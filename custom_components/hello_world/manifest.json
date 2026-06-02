@@ -2,8 +2,5 @@
   "domain": "hello_world",
   "name": "Hello World",
   "version": "1.0.0",
-  "documentation": "https://github.com/senmdaniel/ha-hello-world",
-  "requirements": [],
-  "dependencies": [],
-  "codeowners": ["@senmdaniel"]
+  "requirements": []
 }
