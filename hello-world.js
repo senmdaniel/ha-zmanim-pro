@@ -18,6 +18,5 @@ customElements.define("hello-world-card", HelloWorldCard);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "hello-world-card",
-  name: "Hello World Card",
-  description: "Simple test card"
+  name: "Hello World Card"
 });
