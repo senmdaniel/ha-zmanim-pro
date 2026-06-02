@@ -1,0 +1,8 @@
+{
+  "domain": "hello_json",
+  "name": "Hello World JSON",
+  "version": "1.0.0",
+  "documentation": "https://github.com/senmdaniel/hello.txt",
+  "issue_tracker": "https://github.com",
+  "code_owners": ["@senmdaniel"]
+}
