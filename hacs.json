@@ -1,6 +1,5 @@
 {
   "name": "Hello World Card",
   "content_in_root": true,
-  "render_readme": true,
-  "domain": "hello_world"
+  "render_readme": true
 }
