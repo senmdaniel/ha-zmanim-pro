@@ -4,7 +4,7 @@ class HelloWorldCard extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <ha-card header="Hello World">
         <div style="padding: 16px;">
-          👋 Hello World via HACS (no YAML)
+          👋 Hello World from HACS
         </div>
       </ha-card>
     `;
@@ -15,10 +15,9 @@ class HelloWorldCard extends HTMLElement {
 
 customElements.define("hello-world-card", HelloWorldCard);
 
-// auto-register for Home Assistant
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "hello-world-card",
   name: "Hello World Card",
-  description: "A simple HACS card"
+  description: "Simple test card"
 });
