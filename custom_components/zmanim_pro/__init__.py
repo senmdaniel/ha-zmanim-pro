@@ -1,13 +1,13 @@
 import logging
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant
 from homeassistant.const import Platform
 from homeassistant.components import webhook
 from aiohttp import web
 import homeassistant.util.dt as dt_util
 
 from .date_provider import DateProvider
-from .core_calculations import calculate_zmanim
+from .core.core_calculations import calculate_zmanim
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORMS = [Platform.SENSOR]
@@ -27,7 +27,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 async def handle_webhook_request(hass: HomeAssistant, webhook_id: str, request) -> web.Response:
-    """Dit wordt direct uitgevoerd als je de link opent in de browser."""
+    """Dit wordt direct asynchroon uitgevoerd als je de link opent."""
     try:
         provider = DateProvider()
         current_date = provider.get_current_date()
@@ -41,7 +41,6 @@ async def handle_webhook_request(hass: HomeAssistant, webhook_id: str, request) 
 
         zmanim_output = calculate_zmanim(config_data, current_date)
         
-        # Bouw de JSON-output exact op zoals je Pi deed
         data = {
             "status": "ok",
             "date": str(current_date),
