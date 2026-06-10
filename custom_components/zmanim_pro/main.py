@@ -1,41 +1,62 @@
-name: Generate Daily Zmanim JSON for Loxone
+from datetime import datetime
+import json
+import os
+import pytz
 
-on:
-  schedule:
-    - cron: '0 1 * * *' # Draait elke nacht om 01:00 UTC (02:00 / 03:00 Nederlandse tijd)
-  workflow_dispatch: # Hiermee kun je de actie handmatig starten in GitHub om te testen
+# Importeer de berekeningslogica rechtstreeks uit jouw core map
+from custom_components.zmanim_pro.core.core_calculations import calculate_zmanim
 
-permissions:
-  contents: write
+def main():
+    # Locatiedata ophalen uit de GitHub omgevingsvariabelen
+    config = {
+        "timezone": os.getenv("TIMEZONE", "Europe/Amsterdam"),
+        "latitude": os.getenv("LATITUDE", "52.3676"),
+        "longitude": os.getenv("LONGITUDE", "4.9041"),
+        "city": os.getenv("CITY", "Home")
+    }
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    tz = pytz.timezone(config["timezone"])
+    current_date = datetime.now(tz).date()
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+    # Bereken de Zmanim via jouw eigen engine
+    raw_result = calculate_zmanim(config, current_date)
+    zmanim = raw_result["zmanim"]["zmanim"]
+    shabbat = raw_result["zmanim"]["shabbat_options"]
 
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+    # Vlakke JSON structuur maken die Loxone perfect kan parsen
+    loxone_output = {
+        "datum": current_date.strftime("%Y%m%d"),
+        "shkia_time": zmanim["shkia"]["time"],
+        "shkia_ts": zmanim["shkia"]["ts"],
+        "chatzos_time": zmanim["chatzos"]["time"],
+        "chatzos_ts": zmanim["chatzos"]["ts"],
+        "plag_gra_time": zmanim["plag_hamincha"]["pla_gra"]["time"],
+        "plag_gra_ts": zmanim["plag_hamincha"]["pla_gra"]["ts"],
+        "plag_ma_time": zmanim["plag_hamincha"]["plag_magen_avraham"]["time"],
+        "plag_ma_ts": zmanim["plag_hamincha"]["plag_magen_avraham"]["ts"],
+        "shema_gra_time": zmanim["sof_zman_krias_shema"]["gra"]["time"],
+        "shema_gra_ts": zmanim["sof_zman_krias_shema"]["gra"]["ts"],
+        "shema_ma_time": zmanim["sof_zman_krias_shema"]["magen_avraham"]["time"],
+        "shema_ma_ts": zmanim["sof_zman_krias_shema"]["magen_avraham"]["ts"],
+        "tefila_gra_time": zmanim["sof_zman_tefila"]["gra"]["time"],
+        "tefila_gra_ts": zmanim["sof_zman_tefila"]["gra"]["ts"],
+        "tefila_ma_time": zmanim["sof_zman_tefila"]["magen_avraham"]["time"],
+        "tefila_ma_ts": zmanim["sof_zman_tefila"]["magen_avraham"]["ts"]
+    }
 
-      - name: Run Zmanim script
-        env:
-          TIMEZONE: "Europe/Amsterdam" # Vervang door jouw tijdzone indien nodig
-          LATITUDE: "52.3676"          # VERVANG DOOR JOUW EXACTE LATITUDE
-          LONGITUDE: "4.9041"          # VERVANG DOOR JOUW EXACTE LONGITUDE
-          CITY: "MijnHuis"
-        run: python main.py
+    for option in shabbat["candle_lighting"]:
+        loxone_output[f"{option['id']}_time"] = option["time"]
+        loxone_output[f"{option['id']}_ts"] = option["ts"]
 
-      - name: Commit and Push JSON
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@://github.com"
-          git add zmanim.json
-          git commit -m "Update daily zmanim JSON" || exit 0
-          git push
+    for option in shabbat["tzeis"]:
+        loxone_output[f"{option['id']}_time"] = option["time"]
+        loxone_output[f"{option['id']}_ts"] = option["ts"]
+
+    # Opslaan als zmanim.json
+    with open("zmanim.json", "w") as f:
+        json.dump(loxone_output, f, indent=2)
+        
+    print("Zmanim JSON succesvol gegenereerd!")
+
+if __name__ == "__main__":
+    main()
