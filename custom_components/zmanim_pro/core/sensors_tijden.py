@@ -4,7 +4,7 @@ import homeassistant.util.dt as dt_util
 
 from .const import DOMAIN
 # IMPORT AANGEPAST NAAR JOUW CORE MAP:
-from .core.core_calculations import calculate_zmanim
+from .core_calculations import calculate_zmanim
 
 _LOGGER = logging.getLogger(__name__)
 
