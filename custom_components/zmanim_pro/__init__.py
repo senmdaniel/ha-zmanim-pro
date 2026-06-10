@@ -8,7 +8,7 @@ from .core.core_calculations import calculate_zmanim
 
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+def setup(hass: HomeAssistant, config: dict) -> bool:
     """Zet de Zmanim Pro API direct klaar bij het opstarten van HA."""
     hass.http.register_view(ZmanimApiView(hass))
     return True
